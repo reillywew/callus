@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/api/hvac/(.*)",
-      "dest": "belmonthvac/api/hvac/$1.js"
+      "dest": "belmonthvac/api/hvac/$1"
     }
   ],
   "env": {
