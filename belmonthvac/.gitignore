@@ -12,7 +12,8 @@ yarn-error.log*
 .env.production.local
 
 # Build outputs
-dist/
+# Keep dist in repo for serverless runtime
+!dist/
 build/
 
 # IDE files
