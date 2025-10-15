@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/hvac/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/hvac/(.*)",
+      "dest": "/api/hvac/$1.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
