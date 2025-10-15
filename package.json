@@ -1,0 +1,41 @@
+{
+  "name": "retell-calendar-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "retell-calendar-mcp": "dist/index.js",
+    "retell-calendar-http": "dist/http/server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev:mcp": "tsx src/index.ts",
+    "dev:http": "tsx src/http/server.ts",
+    "oauth:google": "tsx src/scripts/getGoogleRefreshToken.ts",
+    "start:mcp": "node dist/index.js",
+    "start:http": "node dist/http/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.14.1",
+    "googleapis": "^133.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.3",
+    "tsx": "^4.16.2",
+    "typescript": "^5.4.5"
+  }
+}
+

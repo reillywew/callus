@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "belmonthvac/api/hvac/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/hvac/(.*)",
+      "dest": "belmonthvac/api/hvac/$1.js"
+    }
+  ]
+}
+
+
