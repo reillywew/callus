@@ -12,11 +12,18 @@ function parseZones() {
   }
 }
 
+function normalizeZip(input) {
+  if (input === undefined || input === null) return "";
+  const digits = String(input).trim().replace(/\D/g, "");
+  return digits.slice(0, 5);
+}
+
 function findZone(zip) {
   const zones = parseZones();
+  const z = normalizeZip(zip);
   for (const zoneId of Object.keys(zones)) {
     const cfg = zones[zoneId];
-    if (cfg.zips.includes(zip)) return { zone_id: zoneId, ...cfg };
+    if (cfg.zips.includes(z)) return { zone_id: zoneId, ...cfg };
   }
   return null;
 }
@@ -38,7 +45,11 @@ export default async function handler(req, res) {
       } catch (e) { reject(e); }
     });
     const { zip } = body || {};
-    const zc = findZone(zip);
+    const normalized = normalizeZip(zip);
+    if (!normalized) {
+      return res.json({ ok: false, reason: "invalid_zip" });
+    }
+    const zc = findZone(normalized);
     res.json(zc ? { ok: true, ...zc } : { ok: false, reason: "out_of_area" });
   } catch (e) {
     res.status(400).json({ error: (e && e.message) || "unknown error" });
