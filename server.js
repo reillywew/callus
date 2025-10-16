@@ -11,7 +11,7 @@ import bookAppointment from "./belmonthvac/api/hvac/book-appointment.js";
 import createLead from "./belmonthvac/api/hvac/create-lead.js";
 import estimatePrice from "./belmonthvac/api/hvac/estimate-price.js";
 import planJob from "./belmonthvac/api/hvac/plan-job.js";
-import context from "./api/hvac/context.js";
+import { DateTime } from "luxon";
 
 const app = express();
 app.use(express.json());
@@ -30,8 +30,26 @@ app.post("/api/hvac/estimate-price", (req, res) => estimatePrice(req, res));
 app.post("/api/hvac/plan-job", (req, res) => planJob(req, res));
 
 // Context endpoint for agent date/time awareness
-app.get("/api/hvac/context", (req, res) => context(req, res));
-app.post("/api/hvac/context", (req, res) => context(req, res));
+app.get("/api/hvac/context", (req, res) => {
+  const tz = process.env.BUSINESS_TZ || "America/Los_Angeles";
+  const nowLocal = DateTime.now().setZone(tz);
+  res.json({
+    nowIso: nowLocal.toUTC().toISO(),
+    localDate: nowLocal.toFormat('yyyy-LL-dd'),
+    localTime: nowLocal.toFormat('HH:mm'),
+    timezone: tz
+  });
+});
+app.post("/api/hvac/context", (req, res) => {
+  const tz = process.env.BUSINESS_TZ || "America/Los_Angeles";
+  const nowLocal = DateTime.now().setZone(tz);
+  res.json({
+    nowIso: nowLocal.toUTC().toISO(),
+    localDate: nowLocal.toFormat('yyyy-LL-dd'),
+    localTime: nowLocal.toFormat('HH:mm'),
+    timezone: tz
+  });
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
