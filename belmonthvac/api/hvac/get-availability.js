@@ -8,14 +8,14 @@ export default async function handler(req, res) {
   try {
     const { startIso, endIso, duration_min = 60 } = req.body;
     // Basic date sanity guardrail: require a window within the next 45 days
-    const now = Date.now();
+    const nowMs = Date.now();
     const maxAheadMs = 45 * 24 * 60 * 60 * 1000;
     const startMs = Date.parse(startIso || "");
     const endMs = Date.parse(endIso || "");
     if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
       return res.status(400).json({ error: 'invalid_datetime', message: 'Provide ISO strings for startIso and endIso (UTC with Z).'});
     }
-    if (startMs < now - 24*60*60*1000 || endMs - now > maxAheadMs || endMs <= startMs) {
+    if (startMs < nowMs - 24*60*60*1000 || endMs - nowMs > maxAheadMs || endMs <= startMs) {
       return res.status(400).json({ error: 'date_out_of_range', message: 'Pick a time window within the next 45 days and ensure end > start.' });
     }
     
@@ -39,9 +39,9 @@ export default async function handler(req, res) {
     }
     
     // Fallback to mock data
-    const now = Date.now();
+    const baseNowMs = Date.now();
     const mk = (msFromNow, tech, name) => {
-      const start = new Date(now + msFromNow).toISOString();
+      const start = new Date(baseNowMs + msFromNow).toISOString();
       const end = new Date(new Date(start).getTime() + duration_min*60*1000).toISOString();
       return { start, end, tech_id: tech, tech_name: name };
     };
