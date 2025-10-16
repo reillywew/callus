@@ -14,7 +14,22 @@ function parseZones() {
 
 function normalizeZip(input) {
   if (input === undefined || input === null) return "";
-  const digits = String(input).trim().replace(/\D/g, "");
+  let str = String(input).trim();
+  // Convert common spoken digit words to numeric digits
+  const wordToDigit = {
+    zero: "0", oh: "0",
+    one: "1",
+    two: "2", to: "2", too: "2",
+    three: "3",
+    four: "4", for: "4",
+    five: "5",
+    six: "6",
+    seven: "7",
+    eight: "8", ate: "8",
+    nine: "9"
+  };
+  str = str.toLowerCase().replace(/\b([a-z]+)\b/g, (m) => (wordToDigit[m] ?? m));
+  const digits = str.replace(/\D/g, "");
   return digits.slice(0, 5);
 }
 
