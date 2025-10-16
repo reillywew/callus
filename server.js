@@ -31,6 +31,7 @@ app.post("/api/hvac/plan-job", (req, res) => planJob(req, res));
 
 // Context endpoint for agent date/time awareness
 app.get("/api/hvac/context", (req, res) => context(req, res));
+app.post("/api/hvac/context", (req, res) => context(req, res));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
