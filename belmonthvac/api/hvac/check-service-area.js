@@ -59,8 +59,8 @@ export default async function handler(req, res) {
         req.on('error', reject);
       } catch (e) { reject(e); }
     });
-    const { zip } = body || {};
-    const normalized = normalizeZip(zip);
+    const zipInput = (body && (body.zip ?? body.args?.zip ?? body.postal ?? body.postal_code ?? body.zip_code)) ?? "";
+    const normalized = normalizeZip(zipInput);
     if (!normalized) {
       return res.json({ ok: false, reason: "invalid_zip" });
     }
