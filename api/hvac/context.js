@@ -1,12 +1,13 @@
 import { DateTime } from "luxon";
 
 export default async function handler(req, res) {
-  const now = DateTime.now();
+  const tz = process.env.BUSINESS_TZ || "America/Los_Angeles";
+  const nowLocal = DateTime.now().setZone(tz);
   res.json({
-    nowIso: now.toUTC().toISO(),
-    localDate: now.toFormat('yyyy-LL-dd'),
-    localTime: now.toFormat('HH:mm'),
-    timezone: now.zoneName
+    nowIso: nowLocal.toUTC().toISO(),
+    localDate: nowLocal.toFormat('yyyy-LL-dd'),
+    localTime: nowLocal.toFormat('HH:mm'),
+    timezone: tz
   });
 }
 
