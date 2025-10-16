@@ -20,6 +20,20 @@ function normalizeEmail(raw) {
   return simple.test(s) ? s : raw;
 }
 
+function buildNormalizedEmail(customer) {
+  const candidates = [];
+  const simple = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (customer?.email) candidates.push(normalizeEmail(customer.email));
+  if (customer?.email_spelled) candidates.push(normalizeEmail(customer.email_spelled));
+  const local = customer?.email_local || customer?.emailLocal || null;
+  const domain = customer?.email_domain || customer?.emailDomain || null;
+  if (local && domain) candidates.push(normalizeEmail(`${local}@${domain}`));
+  for (const c of candidates) {
+    if (c && simple.test(String(c))) return String(c);
+  }
+  return null;
+}
+
 function summarizeDiagnosis(diagnosis) {
   if (!diagnosis || typeof diagnosis !== 'object') return null;
   const parts = [];
@@ -78,7 +92,7 @@ export default async function handler(req, res) {
       
       const summary = `HVAC ${payload?.job?.symptom ?? "Service"} - ${customer?.full_name ?? "Customer"}`;
       const diagnosis = payload?.job?.diagnosis ?? {};
-      const normalizedEmail = normalizeEmail(customer?.email);
+      const normalizedEmail = buildNormalizedEmail(customer);
       const diagSummary = summarizeDiagnosis(diagnosis);
       const originalIssue = payload?.job?.issue_summary || payload?.job?.symptom || "";
       const descLines = [
@@ -101,7 +115,7 @@ export default async function handler(req, res) {
         endIso: window.end, 
         summary, 
         description, 
-        attendeeEmail: normalizedEmail || customer?.email, 
+        attendeeEmail: normalizedEmail || undefined, 
         calendarId: "primary" 
       });
       

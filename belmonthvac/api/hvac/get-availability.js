@@ -18,6 +18,10 @@ export default async function handler(req, res) {
     if (startMs < nowMs - 24*60*60*1000 || endMs - nowMs > maxAheadMs || endMs <= startMs) {
       return res.status(400).json({ error: 'date_out_of_range', message: 'Pick a time window within the next 45 days and ensure end > start.' });
     }
+    // Reject windows that are entirely in the past relative to now
+    if (endMs <= nowMs) {
+      return res.status(400).json({ error: 'window_in_past', message: 'Requested window has already passed. Choose a future window (e.g., tomorrow 9 AM–5 PM local).' });
+    }
     
     if (isGoogleCalendarConfigured() && startIso && endIso) {
       const provider = await createGoogleCalendarProvider();

@@ -12,6 +12,11 @@ import createLead from "./belmonthvac/api/hvac/create-lead.js";
 import estimatePrice from "./belmonthvac/api/hvac/estimate-price.js";
 import planJob from "./belmonthvac/api/hvac/plan-job.js";
 import { DateTime } from "luxon";
+import sendIntakeSms from "./api/hvac/send-intake-sms.js";
+import finalizeIntakeBooking from "./api/hvac/finalize-intake-booking.js";
+import createIntakeLink from "./api/hvac/create-intake-link.js";
+import getIntakeData from "./api/hvac/get-intake-data.js";
+import submitIntakeForm from "./api/hvac/submit-intake-form.js";
 
 const app = express();
 app.use(express.json());
@@ -40,6 +45,13 @@ app.get("/api/hvac/context", (req, res) => {
     timezone: tz
   });
 });
+
+// SMS intake confirmation
+app.post("/api/hvac/send-intake-sms", (req, res) => sendIntakeSms(req, res));
+app.post("/api/hvac/finalize-intake-booking", (req, res) => finalizeIntakeBooking(req, res));
+app.post("/api/hvac/create-intake-link", (req, res) => createIntakeLink(req, res));
+app.get("/api/hvac/intake/:token", (req, res) => getIntakeData(req, res));
+app.post("/api/hvac/submit-intake", (req, res) => submitIntakeForm(req, res));
 app.post("/api/hvac/context", (req, res) => {
   const tz = process.env.BUSINESS_TZ || "America/Los_Angeles";
   const nowLocal = DateTime.now().setZone(tz);
