@@ -11,6 +11,7 @@ import bookAppointment from "./belmonthvac/api/hvac/book-appointment.js";
 import createLead from "./belmonthvac/api/hvac/create-lead.js";
 import estimatePrice from "./belmonthvac/api/hvac/estimate-price.js";
 import planJob from "./belmonthvac/api/hvac/plan-job.js";
+import context from "./api/hvac/context.js";
 
 const app = express();
 app.use(express.json());
@@ -27,6 +28,9 @@ app.post("/api/hvac/book-appointment", (req, res) => bookAppointment(req, res));
 app.post("/api/hvac/create-lead", (req, res) => createLead(req, res));
 app.post("/api/hvac/estimate-price", (req, res) => estimatePrice(req, res));
 app.post("/api/hvac/plan-job", (req, res) => planJob(req, res));
+
+// Context endpoint for agent date/time awareness
+app.get("/api/hvac/context", (req, res) => context(req, res));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

@@ -7,6 +7,17 @@ export default async function handler(req, res) {
 
   try {
     const { startIso, endIso, duration_min = 60 } = req.body;
+    // Basic date sanity guardrail: require a window within the next 45 days
+    const now = Date.now();
+    const maxAheadMs = 45 * 24 * 60 * 60 * 1000;
+    const startMs = Date.parse(startIso || "");
+    const endMs = Date.parse(endIso || "");
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+      return res.status(400).json({ error: 'invalid_datetime', message: 'Provide ISO strings for startIso and endIso (UTC with Z).'});
+    }
+    if (startMs < now - 24*60*60*1000 || endMs - now > maxAheadMs || endMs <= startMs) {
+      return res.status(400).json({ error: 'date_out_of_range', message: 'Pick a time window within the next 45 days and ensure end > start.' });
+    }
     
     if (isGoogleCalendarConfigured() && startIso && endIso) {
       const provider = await createGoogleCalendarProvider();

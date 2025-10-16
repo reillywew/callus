@@ -9,6 +9,18 @@ export default async function handler(req, res) {
   try {
     const payload = req.body;
     const { window, customer } = payload ?? {};
+
+    // Guardrail: require booking window within next 45 days and end > start
+    const maxAheadMs = 45 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const startMs = Date.parse(window?.start || "");
+    const endMs = Date.parse(window?.end || "");
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
+      return res.status(400).json({ error: 'invalid_window', message: 'Provide a valid ISO window {start,end} where end > start (UTC with Z).'});
+    }
+    if (startMs < now - 24*60*60*1000 || endMs - now > maxAheadMs) {
+      return res.status(400).json({ error: 'date_out_of_range', message: 'Book within the next 45 days.' });
+    }
     
     if (isGoogleCalendarConfigured() && window?.start && window?.end) {
       const provider = await createGoogleCalendarProvider();
