@@ -1,6 +1,42 @@
 import { createGoogleCalendarProvider, isGoogleCalendarConfigured } from "../../dist/integrations/googleCalendar.js";
 import { ulid } from "ulid";
 
+function normalizeEmail(raw) {
+  if (!raw) return "";
+  let s = String(raw).trim().toLowerCase();
+  // Collapse spaces and common spoken tokens
+  s = s.replace(/\s+at\s+/g, "@");
+  s = s.replace(/\s*\bat\b\s*/g, "@");
+  s = s.replace(/\s*dot\s*/g, ".");
+  s = s.replace(/g\s*mail/g, "gmail");
+  s = s.replace(/out\s*look/g, "outlook");
+  s = s.replace(/i\s*cloud/g, "icloud");
+  s = s.replace(/hot\s*mail/g, "hotmail");
+  s = s.replace(/y\s*ahoo/g, "yahoo");
+  s = s.replace(/\s+/g, "");
+  s = s.replace(/\.+$/g, ""); // drop trailing dots
+  // Basic validity; if missing '@' we can't safely fix
+  const simple = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return simple.test(s) ? s : raw;
+}
+
+function summarizeDiagnosis(diagnosis) {
+  if (!diagnosis || typeof diagnosis !== 'object') return null;
+  const parts = [];
+  const equipCat = diagnosis.equipment_category || (diagnosis.system_type ? (diagnosis.system_type.includes('heat') ? 'heat' : 'ac') : undefined);
+  const equipType = diagnosis.equipment_type || diagnosis.system_type;
+  if (equipCat === 'ac') {
+    parts.push(equipType ? `${equipType === 'central' || /central/i.test(equipType) ? 'Central AC' : equipType}` : 'AC');
+  } else if (equipCat === 'heat') {
+    parts.push(equipType ? equipType : 'Heating');
+  }
+  if (diagnosis.blowing_air === true) parts.push('air blows from vents');
+  if (diagnosis.blowing_air === false) parts.push('no air from vents');
+  if (diagnosis.smells) parts.push(`smells: ${diagnosis.smells}`); else parts.push('no unusual smells');
+  if (diagnosis.noises) parts.push(`noises: ${diagnosis.noises}`); else parts.push('no unusual noises');
+  return parts.filter(Boolean).join('; ');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -41,19 +77,31 @@ export default async function handler(req, res) {
       }
       
       const summary = `HVAC ${payload?.job?.symptom ?? "Service"} - ${customer?.full_name ?? "Customer"}`;
-      const description = [
+      const diagnosis = payload?.job?.diagnosis ?? {};
+      const normalizedEmail = normalizeEmail(customer?.email);
+      const diagSummary = summarizeDiagnosis(diagnosis);
+      const originalIssue = payload?.job?.issue_summary || payload?.job?.symptom || "";
+      const descLines = [
         `Phone: ${customer?.phone ?? ""}`,
-        `Email: ${customer?.email ?? ""}`,
+        `Email: ${normalizedEmail || customer?.email || ""}`,
         `Address: ${payload?.location?.address_line1 ?? ""}, ${payload?.location?.city ?? ""} ${payload?.location?.zip ?? ""}`,
-        `Notes: ${payload?.job?.issue_summary ?? ""}`
-      ].filter(Boolean).join("\n");
+        originalIssue ? `Original issue: ${originalIssue}` : null,
+        diagnosis?.system_type ? `System: ${diagnosis.system_type}` : null,
+        diagnosis?.blowing_air != null ? `Blowing air: ${diagnosis.blowing_air ? "yes" : "no"}` : null,
+        diagnosis?.thermostat_ok != null ? `Thermostat OK: ${diagnosis.thermostat_ok ? "yes" : "no"}` : null,
+        diagnosis?.smells ? `Smells: ${diagnosis.smells}` : null,
+        diagnosis?.noises ? `Noises: ${diagnosis.noises}` : null,
+        diagnosis?.last_service ? `Last service: ${diagnosis.last_service}` : null
+      ].filter(Boolean);
+      if (diagSummary) descLines.push(`Diagnosis: ${diagSummary}`);
+      const description = descLines.join("\n");
       
       const event = await provider.bookEvent({ 
         startIso: window.start, 
         endIso: window.end, 
         summary, 
         description, 
-        attendeeEmail: customer?.email, 
+        attendeeEmail: normalizedEmail || customer?.email, 
         calendarId: "primary" 
       });
       
