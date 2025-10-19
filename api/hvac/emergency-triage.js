@@ -5,19 +5,21 @@ const EMERGENCY_KEYWORDS = [
   /carbon\s*monoxide/i,
   /co\s*alarm/i,
   /water\s*(leak|pouring|flood)/i,
-  /no\s*heat/i,
-  /no\s*cool/i,
+  /no\s*(heat|cool)/i,
   /infant|elderly|senior|baby/i
 ];
 
 const PRIORITY_KEYWORDS = [
   /no\s*(heat|cool)/i,
+  /(heater|heating|furnace|boiler|heat pump)\s*(not\s*working|broken|down|out|off|failed)/i,
+  /(cooler|cooling|ac|air\s*conditioner)\s*(not\s*working|broken|down|out|off|failed)/i,
   /water\s*(leak|pouring|flood)/i,
   /burning\s*smell/i,
   /strange\s*smell/i,
   /sparks/i,
   /electrical/i,
-  /electrical\s*issues/i
+  /electrical\s*issues/i,
+  /(not\s*working|broken|down|out|off|failed)\s*(heater|heating|furnace|boiler|cooler|cooling|ac)/i
 ];
 
 const NON_PRIORITY_KEYWORDS = [
