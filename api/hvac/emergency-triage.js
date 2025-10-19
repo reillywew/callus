@@ -11,8 +11,8 @@ const EMERGENCY_KEYWORDS = [
 
 const PRIORITY_KEYWORDS = [
   /no\s*(heat|cool)/i,
-  /(heater|heating|furnace|boiler|heat pump).*?(not\s*working|broken|down|out|off|failed)/i,
-  /(cooler|cooling|ac|air\s*conditioner).*?(not\s*working|broken|down|out|off|failed)/i,
+  /(heater|heating|furnace|boiler|heat pump|hvac|hvac\s*system).*?(not\s*working|broken|down|out|off|failed)/i,
+  /(cooler|cooling|ac|air\s*conditioner|central\s*air|central\s*air\s*unit).*?(not\s*working|broken|down|out|off|failed)/i,
   /water\s*(leak|pouring|flood)/i,
   /burning\s*smell/i,
   /strange\s*smell/i,
