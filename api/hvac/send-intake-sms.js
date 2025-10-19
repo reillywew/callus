@@ -23,9 +23,8 @@ export default async function handler(req, res) {
     // Store partial intake for follow-up booking
     saveIntake(to, { name, email, address, window, job, location });
 
-    const fromNumber = process.env.TWILIO_FROM_NUMBER || null;
-    const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID || null;
-    if (!twilioClient || (!fromNumber && !messagingServiceSid)) {
+    const from = process.env.TWILIO_FROM_NUMBER || process.env.TWILIO_MESSAGING_SERVICE_SID || null;
+    if (!twilioClient || !from) {
       // No Twilio configured; simulate success so the agent flow can proceed
       return res.json({ ok: true, simulated: true });
     }
@@ -39,10 +38,7 @@ export default async function handler(req, res) {
     ].filter(Boolean);
 
     const body = parts.join("\n");
-    const params = { to, body };
-    if (messagingServiceSid) params.messagingServiceSid = messagingServiceSid;
-    else params.from = fromNumber;
-    const msg = await twilioClient.messages.create(params);
+    const msg = await twilioClient.messages.create({ to, from, body });
     res.json({ ok: true, sid: msg.sid });
   } catch (e) {
     res.status(400).json({ error: String(e && e.message ? e.message : e) });

@@ -17,6 +17,9 @@ import finalizeIntakeBooking from "./api/hvac/finalize-intake-booking.js";
 import createIntakeLink from "./api/hvac/create-intake-link.js";
 import getIntakeData from "./api/hvac/get-intake-data.js";
 import submitIntakeForm from "./api/hvac/submit-intake-form.js";
+import listSlots from "./api/hvac/list-slots.js";
+import softHold from "./api/hvac/soft-hold.js";
+import triage from "./api/hvac/emergency-triage.js";
 
 const app = express();
 app.use(express.json());
@@ -33,6 +36,9 @@ app.post("/api/hvac/book-appointment", (req, res) => bookAppointment(req, res));
 app.post("/api/hvac/create-lead", (req, res) => createLead(req, res));
 app.post("/api/hvac/estimate-price", (req, res) => estimatePrice(req, res));
 app.post("/api/hvac/plan-job", (req, res) => planJob(req, res));
+app.post("/api/hvac/list-slots", (req, res) => listSlots(req, res));
+app.post("/api/hvac/soft-hold", (req, res) => softHold(req, res));
+app.post("/api/hvac/triage", (req, res) => triage(req, res));
 
 // Context endpoint for agent date/time awareness
 app.get("/api/hvac/context", (req, res) => {
@@ -52,6 +58,30 @@ app.post("/api/hvac/finalize-intake-booking", (req, res) => finalizeIntakeBookin
 app.post("/api/hvac/create-intake-link", (req, res) => createIntakeLink(req, res));
 app.get("/api/hvac/intake/:token", (req, res) => getIntakeData(req, res));
 app.post("/api/hvac/submit-intake", (req, res) => submitIntakeForm(req, res));
+
+// Call webhook to capture caller information
+app.post("/api/hvac/call-webhook", (req, res) => {
+  try {
+    const { call_id, caller_phone, caller_name, timestamp } = req.body || {};
+    
+    // Store caller info for this call session
+    // In production, you'd store this in Redis or a database
+    console.log(`[webhook] Call ${call_id} from ${caller_phone} (${caller_name}) at ${timestamp}`);
+    
+    // You can store this in memory for now
+    // In production, use Redis: redis.set(`call:${call_id}`, JSON.stringify({caller_phone, caller_name}))
+    
+    res.json({ 
+      ok: true, 
+      message: "Caller info captured",
+      call_id,
+      caller_phone 
+    });
+  } catch (e) {
+    console.error("[webhook] Error:", e);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
 app.post("/api/hvac/context", (req, res) => {
   const tz = process.env.BUSINESS_TZ || "America/Los_Angeles";
   const nowLocal = DateTime.now().setZone(tz);
