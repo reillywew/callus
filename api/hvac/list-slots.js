@@ -34,8 +34,11 @@ export default async function handler(req, res) {
 
     const [sh, sm] = String(start_local).split(":").map(Number);
     const [eh, em] = String(end_local).split(":").map(Number);
-    const startIso = new Date(day.getTime() + (sh*60+sm)*60*1000).toISOString();
-    const endIso = new Date(day.getTime() + (eh*60+em)*60*1000).toISOString();
+    
+    // Create times in Pacific Time (UTC-8 or UTC-7 depending on DST)
+    const pacificOffset = -8 * 60; // Pacific Standard Time offset in minutes
+    const startIso = new Date(day.getTime() + (sh*60+sm)*60*1000 + pacificOffset*60*1000).toISOString();
+    const endIso = new Date(day.getTime() + (eh*60+em)*60*1000 + pacificOffset*60*1000).toISOString();
 
     if (isGoogleCalendarConfigured()) {
       const provider = await createGoogleCalendarProvider();
