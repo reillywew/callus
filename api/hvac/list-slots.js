@@ -5,15 +5,30 @@ export default async function handler(req, res) {
     const { date_text, start_local = "09:00", end_local = "17:00", duration_min = 60 } = req.body || {};
     if (!date_text) return res.status(400).json({ ok: false, error: "missing_date_text" });
 
-    // Very light parser: today/tomorrow or explicit ISO date
+    // Enhanced parser: today/tomorrow, day names, or explicit ISO date
     const base = new Date();
     const lc = String(date_text).toLowerCase();
     let day = null;
-    if (lc.includes("today")) day = new Date(base.getFullYear(), base.getMonth(), base.getDate());
-    else if (lc.includes("tomorrow")) day = new Date(base.getFullYear(), base.getMonth(), base.getDate() + 1);
-    else {
-      const p = new Date(date_text);
-      if (!isNaN(p.getTime())) day = new Date(p.getFullYear(), p.getMonth(), p.getDate());
+    
+    if (lc.includes("today")) {
+      day = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    } else if (lc.includes("tomorrow")) {
+      day = new Date(base.getFullYear(), base.getMonth(), base.getDate() + 1);
+    } else {
+      // Try to parse day names
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayIndex = dayNames.findIndex(d => lc.includes(d));
+      
+      if (dayIndex !== -1) {
+        const today = base.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        let daysUntilTarget = dayIndex - today;
+        if (daysUntilTarget <= 0) daysUntilTarget += 7; // Next week if today or past
+        day = new Date(base.getFullYear(), base.getMonth(), base.getDate() + daysUntilTarget);
+      } else {
+        // Try explicit ISO date
+        const p = new Date(date_text);
+        if (!isNaN(p.getTime())) day = new Date(p.getFullYear(), p.getMonth(), p.getDate());
+      }
     }
     if (!day) return res.status(400).json({ ok: false, error: "invalid_date_text" });
 

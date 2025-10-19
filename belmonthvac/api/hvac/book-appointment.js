@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
       return res.status(400).json({ error: 'invalid_window', message: 'Provide a valid ISO window {start,end} where end > start (UTC with Z).'});
     }
-    if (startMs < now - 24*60*60*1000 || endMs - now > maxAheadMs) {
+    if (startMs < now - 2*60*60*1000 || endMs - now > maxAheadMs) {
       return res.status(400).json({ error: 'date_out_of_range', message: 'Book within the next 45 days.' });
     }
     
