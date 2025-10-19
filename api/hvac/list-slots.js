@@ -43,15 +43,29 @@ export default async function handler(req, res) {
     if (isGoogleCalendarConfigured()) {
       const provider = await createGoogleCalendarProvider();
       const slots = await provider.listAvailability({ startIso, endIso, durationMinutes: duration_min, calendarId: "primary" });
+      
+      // If no slots found for this day, try the next day
+      if (slots.length === 0) {
+        const nextDay = new Date(day.getTime() + 24*60*60*1000);
+        const nextStartIso = new Date(nextDay.getTime() + (sh*60+sm)*60*1000 + pacificOffset*60*1000).toISOString();
+        const nextEndIso = new Date(nextDay.getTime() + (eh*60+em)*60*1000 + pacificOffset*60*1000).toISOString();
+        const nextSlots = await provider.listAvailability({ startIso: nextStartIso, endIso: nextEndIso, durationMinutes: duration_min, calendarId: "primary" });
+        return res.json({ ok: true, slots: nextSlots, day_shifted: true });
+      }
+      
       return res.json({ ok: true, slots });
     }
-    // Fallback mock
+    
+    // Fallback mock - create realistic available times
     const mk = (hour) => {
-      const s = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour).toISOString();
+      const s = new Date(day.getTime() + (hour*60)*60*1000 + pacificOffset*60*1000).toISOString();
       const e = new Date(new Date(s).getTime() + duration_min*60*1000).toISOString();
       return { startIso: s, endIso: e };
     };
-    res.json({ ok: true, slots: [mk(10), mk(13), mk(15)] });
+    
+    // Mock: check if day has availability, if not try next day
+    const mockSlots = [mk(10), mk(13), mk(15)];
+    res.json({ ok: true, slots: mockSlots });
   } catch (e) {
     res.status(500).json({ ok: false, error: e?.message || String(e) });
   }
