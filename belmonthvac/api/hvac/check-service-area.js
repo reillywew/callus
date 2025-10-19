@@ -1,8 +1,64 @@
 // Self-contained to avoid TS imports in Vercel
 function parseZones() {
   const fallback = {
-    "ZONE-A": { name: "Core", zips: ["94002","94061","94062","94063","94065","94070","94301","94306","94402","94403"], visit_fee: 89, after_hours_fee: 49, sla_hours: 24 },
-    "ZONE-B": { name: "Extended", zips: ["94010","94025","94028","94304","94401","94404"], visit_fee: 99, after_hours_fee: 69, sla_hours: 48 }
+    "ZONE-A": { 
+      name: "Core", 
+      zips: [
+        // Original service area
+        "94002","94061","94062","94063","94065","94070","94301","94306","94402","94403",
+        // Mountain View
+        "94040","94041","94043",
+        // Palo Alto
+        "94302","94303","94304","94305","94309",
+        // Redwood City
+        "94061","94062","94063","94065",
+        // San Mateo
+        "94401","94404",
+        // Burlingame
+        "94010",
+        // Menlo Park
+        "94025","94026","94028",
+        // Los Altos
+        "94022","94023","94024",
+        // Atherton
+        "94027",
+        // Sunnyvale
+        "94085","94086","94087","94088","94089"
+      ], 
+      visit_fee: 89, 
+      after_hours_fee: 49, 
+      sla_hours: 24 
+    },
+    "ZONE-B": { 
+      name: "Extended", 
+      zips: [
+        // San Jose areas
+        "95002","95110","95111","95112","95113","95116","95117","95118","95119","95120","95121","95122","95123","95124","95125","95126","95127","95128","95129","95130","95131","95132","95133","95134","95135","95136","95138","95139","95148",
+        // Santa Clara
+        "95050","95051","95052","95053","95054","95055","95056",
+        // Campbell
+        "95008","95009","95011",
+        // Cupertino
+        "95014","95015",
+        // Los Gatos
+        "95030","95031","95032",
+        // Monte Sereno
+        "95030",
+        // Saratoga
+        "95070","95071",
+        // Milpitas
+        "95035","95036",
+        // Morgan Hill
+        "95037","95038",
+        // Gilroy
+        "95020","95021",
+        // Fremont
+        "94536","94537","94538","94539","94555"
+      ], 
+      visit_fee: 99, 
+      after_hours_fee: 69, 
+      sla_hours: 48 
+    }
   };
   try {
     const fromEnv = process.env.ZONE_MAP_JSON ? JSON.parse(process.env.ZONE_MAP_JSON) : null;
