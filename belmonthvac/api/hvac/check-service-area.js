@@ -259,16 +259,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = req.body || await new Promise((resolve, reject) => {
-      try {
-        let raw = "";
-        req.on('data', (c) => { raw += c; });
-        req.on('end', () => {
-          try { resolve(raw ? JSON.parse(raw) : {}); } catch (e) { reject(e); }
-        });
-        req.on('error', reject);
-      } catch (e) { reject(e); }
-    });
+    const body = req.body || {};
     const zipInput = (body && (body.zip ?? body.args?.zip ?? body.postal ?? body.postal_code ?? body.zip_code)) ?? "";
     const normalized = normalizeZip(zipInput);
     if (!normalized) {
